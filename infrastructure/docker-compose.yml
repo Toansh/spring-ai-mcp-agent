@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: triage-postgres
+    environment:
+      POSTGRES_DB: telemetry_triage
+      POSTGRES_USER: triage_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-triage_secret}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U triage_user -d telemetry_triage"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - triage-net
+
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    container_name: triage-app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/telemetry_triage
+      SPRING_DATASOURCE_USERNAME: triage_user
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-triage_secret}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+      SPRING_PROFILES_ACTIVE: docker
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    networks:
+      - triage-net
+
+networks:
+  triage-net:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

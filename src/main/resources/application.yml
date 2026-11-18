@@ -1,0 +1,82 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: spring-ai-mcp-agent
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/telemetry_triage
+    username: triage_user
+    password: triage_secret
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: TriageHikariPool
+      maximum-pool-size: 10
+      minimum-idle: 2
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-timeout: 20000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY}
+      chat:
+        options:
+          model: claude-sonnet-4-5
+          temperature: 0.1
+          max-tokens: 4096
+
+    vectorstore:
+      pgvector:
+        dimensions: 1536
+        index-type: HNSW
+        distance-type: COSINE_DISTANCE
+        initialize-schema: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
+    dev.toansh: DEBUG
+    org.springframework.ai: INFO
+
+app:
+  rag:
+    vector-weight: 0.7
+    top-k: 5
+  agent:
+    max-iterations: 5
+    timeout-seconds: 30
+
+---
+spring:
+  config:
+    activate:
+      on-profile: docker
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/telemetry_triage}
+    username: ${SPRING_DATASOURCE_USERNAME:triage_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:triage_secret}
+
+  ai:
+    anthropic:
+      api-key: ${ANTHROPIC_API_KEY}

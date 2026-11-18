@@ -1,0 +1,26 @@
+[
+  {
+    "caseId": "CASE-001",
+    "vehicleId": "VH-001",
+    "description": "Vehicle reports 11.8V battery voltage under accessory load with sluggish ignition start.",
+    "expectedRootCause": "Battery undercharge or cell degradation below 12V normal operating threshold.",
+    "expectedAction": "Perform battery load test and alternator charging circuit inspection.",
+    "expectedEscalation": false
+  },
+  {
+    "caseId": "CASE-002",
+    "vehicleId": "VH-002",
+    "description": "Continuous engine coolant temperature spikes exceeding 103C with low coolant warning.",
+    "expectedRootCause": "Cooling system failure / low coolant leading to imminent engine overheat.",
+    "expectedAction": "Immediate vehicle shutdown, inspect radiator, thermostat, and coolant level.",
+    "expectedEscalation": true
+  },
+  {
+    "caseId": "CASE-003",
+    "vehicleId": "VH-003",
+    "description": "Front left tire pressure reads 28 PSI against recommended 32 PSI cold pressure.",
+    "expectedRootCause": "Minor tire under-inflation due to ambient temperature change or slow leak.",
+    "expectedAction": "Inflate tire to recommended 32 PSI and inspect tread for punctures.",
+    "expectedEscalation": false
+  }
+]
